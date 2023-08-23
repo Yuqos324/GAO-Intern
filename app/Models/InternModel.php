@@ -38,4 +38,9 @@ class InternModel extends Model
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
+
+    public function internCount()
+    {
+        return $this->db->table('interns')->countAll();
+    }
 }

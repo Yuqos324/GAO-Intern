@@ -2,111 +2,120 @@
 
 namespace App\Controllers;
 
-use CodeIgniter\RESTful\ResourceController;
+use App\Controllers\BaseController;
 use App\Models\InternModel;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
-class Admin extends ResourceController
+class Admin extends BaseController
 {
-    public function __construct() {
+
+    public function __construct()
+    {
         $this->internModel = new InternModel();
     }
-    /**
-     * Return an array of resource objects, themselves in array format
-     *
-     * @return mixed
-     */
+
     public function index()
     {
         $interns = $this->internModel->findAll();
 
-        $payload = [
-            "products" => $interns
+        $data = [
+            "interns" => $interns,
         ];
 
-        echo view('admin/index');
+        echo view('admin/index', $data);
     }
 
-    /**
-     * Return the properties of a resource object
-     *
-     * @return mixed
-     */
-    public function show($id = null)
+    public function input()
     {
-        //
+        echo view ('admin/input');
     }
 
-    /**
-     * Return a new resource object, with default properties
-     *
-     * @return mixed
-     */
-    public function new()
-    {
-        echo view('/admin/input');
+    public function internTable() {
+        $interns = $this->internModel->findAll();
+
+        $data = [
+            "interns" => $interns,
+            "intern_count" => $this->internModel->internCount(),
+        ];
+
+        echo view('admin/table', $data);
     }
 
-    /**
-     * Create a new resource object, from "posted" parameters
-     *
-     * @return mixed
-     */
     public function create()
     {
-        $payload = [
-            "name" => $this->request->getPost('name'),
-            "cof" => $this->request->getPost('cof'),
-            "current_edu" => $this->request->getPost('current_edu'),
-            "edu_status" => $this->request->getPost('edu_status'),
+        $data = [
+            "name" => $this-> request->getpost('name'),
+            "cof" => $this-> request->getpost('cof'),
+            "current_edu" => $this-> request->getpost('current_edu'),
+            "edu_status" => $this-> request->getpost('edu_status'),
         ];
 
-
-        $this->internModel->insert($payload);
+        $this->internModel->insert($data);
         return redirect()->to('/admin');
     }
 
-    /**
-     * Return the editable properties of a resource object
-     *
-     * @return mixed
-     */
     public function edit($id = null)
     {
-        $interns = $this->internModel->find($id);
-        
-        if (!$interns) {
-            throw new \Exception("Data not found!");   
+        $intern = $this->internModel->find($id);
+
+        if (!$intern){
+            throw new \Exception("Data not found!");
         }
-        
-        echo view('admin/edit', ["data" => $interns]);
+
+        echo view('admin/edit', ["data" => $intern]);
     }
 
-    /**
-     * Add or update a model resource, from "posted" properties
-     *
-     * @return mixed
-     */
     public function update($id = null)
     {
-        $payload = [
-            "name" => $this->request->getPost('name'),
-            "cof" => $this->request->getPost('cof'),
-            "current_edu" => $this->request->getPost('current_edu'),
-            "edu_status" => $this->request->getPost('edu_status'),
+        $data = [
+            "name" => $this-> request->getpost('name'),
+            "cof" => $this-> request->getpost('cof'),
+            "current_edu" => $this-> request->getpost('current_edu'),
+            "edu_status" => $this-> request->getpost('edu_status'),
         ];
 
-        $this->internModel->update($id, $payload);
+        $this->internModel->update($id, $data);
         return redirect()->to('/admin');
     }
 
-    /**
-     * Delete the designated resource object from the model
-     *
-     * @return mixed
-     */
     public function delete($id = null)
     {
         $this->internModel->delete($id);
         return redirect()->to('/admin');
+    }
+
+    public function export()
+    {
+        $interns = $this->internModel->findAll();
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $sheet->setCellValue('A1', 'Name');
+        $sheet->setCellValue('B1', 'Country of Residence');
+        $sheet->setCellValue('C1', 'Current Education');
+        $sheet->setCellValue('D1', 'Education Status');
+
+        $column = 2;
+        foreach($interns as $item ){
+            $sheet->setCellValue('A'.$column, $item['name']);
+            $sheet->setCellValue('B'.$column, $item['cof']);
+            $sheet->setCellValue('C'.$column, $item['current_edu']);
+            $sheet->setCellValue('D'.$column, $item['edu_status']);
+            $column++;
+        }
+
+        $sheet->getColumnDimension('A')->setAutoSize(true);
+        $sheet->getColumnDimension('B')->setAutoSize(true);
+        $sheet->getColumnDimension('C')->setAutoSize(true);
+        $sheet->getColumnDimension('D')->setAutoSize(true);
+
+        $writer = new Xlsx($spreadsheet);
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition : attachment;filename=gao-interns-list.xlsx');
+        header('Cache-Control: max-age=0');
+        $writer->save('php://output');
+        exit();
     }
 }

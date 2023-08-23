@@ -25,6 +25,7 @@ class InternLists extends Migration
             "current_edu" => [
                 "type"=> "VARCHAR",
                 "constraint" => "200",
+                "null" => false,
             ],
             "edu_status" => [
                 "type"=> "VARCHAR",

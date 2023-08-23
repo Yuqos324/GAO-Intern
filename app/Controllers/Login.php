@@ -57,10 +57,10 @@ class Login extends ResourceController
                 'password' => 'required',
             ], [
                 "email" => [
-                    "required" => "Email harus diisi!",
+                    "required" => "Email is required!",
                 ],
                 "password" => [
-                    "required" => "Anda harus mengisi kata sandi!",
+                    "required" => "Password is required!",
                 ],
             ]);
 
@@ -77,12 +77,12 @@ class Login extends ResourceController
                     ->first();
     
             if(!$user) {
-                session()->setFlashData("errors", "Email salah!");
+                session()->setFlashData("errors", "Wrong Email!");
                 return redirect()->to(previous_url())->withInput();
             }
     
             if(md5($password) != $user['password']) {
-                session()->setFlashData("errors", "Password salah!");
+                session()->setFlashData("errors", "Wrong password!");
                 return redirect()->to(previous_url())->withInput();
             }
     

@@ -36,14 +36,14 @@ $routes->resource('login');
 $routes->resource('logout');
 
 $routes->group('', ['filter' => 'authMiddleware'], function($routes) {
-    $routes->get('admin/new',             'Admin::new');
-    $routes->post('admin',                'Admin::create');
-    $routes->get('admin',                 'Admin::index');
-    $routes->get('admin/(:segment)',      'Admin::show/$1');
-    $routes->get('admin/(:segment)/edit', 'Admin::edit/$1');
-    $routes->put('admin/(:segment)',      'Admin::update/$1');
-    $routes->patch('admin/(:segment)',    'Admin::update/$1');
-    $routes->delete('admin/(:segment)',   'Admin::delete/$1');
+    $routes->get('/admin', 'Admin::index');
+    $routes->get('/input', 'Admin::input');
+    $routes->post('admin', 'Admin::create');
+    $routes->get('/table', 'Admin::internTable');
+    $routes->get('product/(:segment)/edit', 'Admin::edit/$1');
+    $routes->put('admin/(:segment)', 'Admin::update/$1');
+    $routes->delete('product/(:segment)', 'Admin::delete/$1');
+    $routes->get('/export', 'Admin::export');
 });
 
 
